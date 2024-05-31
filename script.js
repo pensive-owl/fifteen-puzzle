@@ -1,119 +1,91 @@
-const puzzleSlots = document.querySelectorAll('div.puzzle-slot');
-const puzzleSlot1 = document.getElementById('puzzle-slot-1');
-const emptySlot = document.getElementById('puzzle-slot-empty');
+// Helper function to search the puzzle box for a slot with no child nodes
+function findEmptySlot() {
+    for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 4; col++) {
+            if (puzzleStateArray[row][col] === null) {
+                return { row, col };
+            }
+        }
+    }
+}
+
+// Helper function to return true if the piece is able to move
+function isValidMove(row, col, emptySlot) {
+    const { row: emptyRow, col: emptyCol } = emptySlot;
+    // Manhattan distance
+    return Math.abs(row - emptyRow) + Math.abs(col - emptyCol) === 1;
+}
+
+// Helper function to move pieces and refresh the game board
+function movePiece(row, col, emptySlot) {
+    const { row: emptyRow, col: emptyCol } = emptySlot;
+    puzzleStateArray[emptyRow][emptyCol] = puzzleStateArray[row][col];
+    puzzleStateArray[row][col] = puzzleStateArray[emptyRow][emptyCol];
+    puzzleStateArray[row][col] = null;
+    puzzleBox.innerHTML = '';
+    createSlots();
+    createPieces();
+}
+
+// Helper function to pass the clicked piece row and col data to the isValidMove and movePiece functions
+function handlePieceClick(e) {
+    const piece = e.target;
+    const pieceRow = parseInt(piece.dataset.row);
+    const pieceCol = parseInt(piece.dataset.col);
+    const emptySlot = findEmptySlot();
+    if (isValidMove(pieceRow, pieceCol, emptySlot)) {
+        movePiece(pieceRow, pieceCol, emptySlot);
+    }
+}
 
 const puzzleBox = document.getElementById('fifteen-puzzle');
 
-// Array to contain pieces
-let pieceArray = [];
+// Declare and initialize puzzle state array. Numbers can be substituted with image urls
+let puzzleStateArray = [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12],
+    [13, 14, 15, null],
+];
 
-
-// Constructs 15 puzzle pieces and 1 empty piece
-function puzzleConstructor() {
-    for (let i = 1; i <= 16; i++) {
-
-        // Create puzzle slots and append to puzzle box
-        const slot = document.createElement('div');
-        slot.classList.add('slot');
-        slot.id = `slot-${i}`;
-        puzzleBox.appendChild(slot);
-        
-        // Create pieces and append to slots
-        if (i != 16) {
-            const puzzlePiece = document.createElement('button');
-            puzzlePiece.classList.add('piece');
-            puzzlePiece.id = `piece-${i}`;
-            puzzlePiece.addEventListener('click', pieceOnClick)
-            const pieceContent = document.createTextNode(`${i}`);
-            puzzlePiece.appendChild(pieceContent);
-            // slot.appendChild(puzzlePiece);
-            pieceSlotConstructor(puzzlePiece, slot);
-        // } else { 
-        //     const puzzlePiece = document.createElement('button');
-        //     puzzlePiece.classList.add('empty');
-        //     puzzlePiece.id = `empty-piece`;
-        //     // slot.appendChild(puzzlePiece);
-        //     pieceSlotConstructor(puzzlePiece, slot);
+// Create puzzle slots and append to puzzle box
+function createSlots() {
+    // Loop through each row and set to empty
+    for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 4; col++) {
+            slot = document.createElement('div');
+            slot.classList.add('slot');
+            slot.dataset.row = row;
+            slot.dataset.col = col;
+            puzzleBox.appendChild(slot);
         }
-        // Establish slot - piece relationship with object constructor
-
-        
     }
-    // console.log(pieceArray);
-    // return pieceSlotObject
-}
-puzzleConstructor();
-
-// Function to construct piece-slot object
-function pieceSlotConstructor (piece, slot) {
-    const pieceSlotObject = new Object({
-        piece: piece,
-        slot: slot,
-        binding: slot.appendChild(piece),
-    })
-    pieceArray.push(pieceSlotObject);
 }
 
+// Creates pieces with the value stored in the puzzleStateArray
+function createPieces() {
+    for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 4; col++) {
+            const value = puzzleStateArray[row][col];
+            if (value !== null) {
+                piece = document.createElement('button');
+                piece.classList.add('piece');
+                piece.textContent = value;
+                piece.dataset.row = row;
+                piece.dataset.col = col;
 
-// Piece on-click function
-function pieceOnClick (e) {
-    const targetSlot = e.target.parentElement;
-    const emptySlot = findEmptySlot();
-    emptySlot.appendChild(e.target.Object);
-}
+                // Add click event listener to pieces
+                piece.addEventListener('click', handlePieceClick);
 
-// Search the puzzle box for a slot with no child nodes
-function findEmptySlot () {
-    slots = puzzleBox.childNodes;
-    slots.forEach(slot => {
-        if (slot.childNodes.length === 0) { 
-            console.log(slot);
-            return slot;
+                // Append to slot based on row col data from the puzzleStateArray
+                slot = document.querySelector(
+                    `.slot[data-row='${row}'][data-col='${col}']`
+                );
+                slot.appendChild(piece);
+            }
         }
-    });
-
+    }
 }
 
-// findEmptySlot();
-
-
-
-
-
-
-
-
-// function puzzleState ()
-
-// need to make the tiles buttons?
-
-// const tileLeftClick = (e) => {
-    
-    
-//     console.log(e.target);
-// };
-
-// tileArray.forEach((tile) => {
-//    addEventListener('click', tileLeftClick);
-    
-
-    
-// })
-// function findEmptySlot (array) {
-//     array.forEach((tile) => { 
-//         if (tile === null) {
-//             return 'hello';
-//         } else {
-//             return Error('No empty tiles')
-//         }
-//     })
-// }
-// console.log(findEmptySlot(tileArray));
-// console.log(tileInSlot(tileArray[15]));
-
-// function tileArray (element) {
-//     tileArray = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
-//     return tileArray;
-// }
-
-// console.log(tileArray(element));
+createSlots();
+createPieces();
